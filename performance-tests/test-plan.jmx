@@ -38,6 +38,20 @@
         </CSVDataSet>
         <hashTree/>
 
+        <!-- HTTP Authorization Manager -->
+        <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
+          <collectionProp name="AuthManager.auth_list">
+            <elementProp name="" elementType="Authorization">
+              <stringProp name="Authorization.url">http://${__P(gateway.host,gateway-server)}:${__P(gateway.port,8080)}</stringProp>
+              <stringProp name="Authorization.username">${__P(auth.username,admin)}</stringProp>
+              <stringProp name="Authorization.password">${__P(auth.password,password)}</stringProp>
+              <stringProp name="Authorization.domain"></stringProp>
+              <stringProp name="Authorization.realm"></stringProp>
+            </elementProp>
+          </collectionProp>
+        </AuthManager>
+        <hashTree/>
+
         <!-- HTTP Header Manager -->
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="JSON Header" enabled="true">
           <collectionProp name="HeaderManager.headers">
@@ -128,6 +142,20 @@
         </CSVDataSet>
         <hashTree/>
 
+        <!-- HTTP Authorization Manager -->
+        <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
+          <collectionProp name="AuthManager.auth_list">
+            <elementProp name="" elementType="Authorization">
+              <stringProp name="Authorization.url">http://${__P(gateway.host,gateway-server)}:${__P(gateway.port,8080)}</stringProp>
+              <stringProp name="Authorization.username">${__P(auth.username,admin)}</stringProp>
+              <stringProp name="Authorization.password">${__P(auth.password,password)}</stringProp>
+              <stringProp name="Authorization.domain"></stringProp>
+              <stringProp name="Authorization.realm"></stringProp>
+            </elementProp>
+          </collectionProp>
+        </AuthManager>
+        <hashTree/>
+
         <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="Product HTTP Defaults" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
             <collectionProp name="Arguments.arguments"/>
@@ -198,6 +226,20 @@
           <boolProp name="stopThread">false</boolProp>
           <stringProp name="shareMode">shareMode_all</stringProp>
         </CSVDataSet>
+        <hashTree/>
+
+        <!-- HTTP Authorization Manager -->
+        <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
+          <collectionProp name="AuthManager.auth_list">
+            <elementProp name="" elementType="Authorization">
+              <stringProp name="Authorization.url">http://${__P(gateway.host,gateway-server)}:${__P(gateway.port,8080)}</stringProp>
+              <stringProp name="Authorization.username">${__P(auth.username,admin)}</stringProp>
+              <stringProp name="Authorization.password">${__P(auth.password,password)}</stringProp>
+              <stringProp name="Authorization.domain"></stringProp>
+              <stringProp name="Authorization.realm"></stringProp>
+            </elementProp>
+          </collectionProp>
+        </AuthManager>
         <hashTree/>
 
         <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="Order HTTP Defaults" enabled="true">

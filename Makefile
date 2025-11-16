@@ -31,7 +31,9 @@ perf-test:
 		-n -t /tests/test-plan.jmx \
 		-l /results/results-$(shell date +%Y%m%d-%H%M%S).jtl \
 		-Jgateway.host=gateway-server \
-		-Jgateway.port=8080
+		-Jgateway.port=8080 \
+		-Jauth.username=${AUTH_USERNAME} \
+		-Jauth.password=${AUTH_PASSWORD}
 
 postman-test:
 	@echo "Running Postman tests via gateway..."

@@ -25,6 +25,9 @@ public class ProductService {
     }
     
     public Optional<Product> getProductById(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         logger.debug("Fetching product by id={}", id);
         Optional<Product> result = productRepository.findById(id);
         if (result.isPresent()) logger.debug("Found product id={}", id);
@@ -40,6 +43,9 @@ public class ProductService {
     }
     
     public Product updateProduct(Long id, Product productDetails) {
+        if (id == null) {
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
         logger.info("Updating product id={}", id);
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -53,6 +59,9 @@ public class ProductService {
     }
     
     public void deleteProduct(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
         logger.info("Deleting product id={}", id);
         productRepository.deleteById(id);
     }

@@ -25,6 +25,9 @@ public class UserService {
     }
     
     public Optional<User> getUserById(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         logger.debug("Fetching user by id={}", id);
         Optional<User> result = userRepository.findById(id);
         if (result.isPresent()) logger.debug("Found user id={}", id);
@@ -40,6 +43,9 @@ public class UserService {
     }
     
     public User updateUser(Long id, User userDetails) {
+        if (id == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        }
         logger.info("Updating user id={}", id);
         User user = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -73,6 +79,9 @@ public class UserService {
      * (PUT semantics) and requires required fields to be present.
      */
     public User replaceUser(Long id, User userDetails) {
+        if (id == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        }
         logger.info("Replacing user id={}", id);
         User user = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -95,6 +104,9 @@ public class UserService {
     }
     
     public void deleteUser(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        }
         logger.info("Deleting user id={}", id);
         userRepository.deleteById(id);
     }

@@ -43,6 +43,9 @@ public class OrderService {
     }
     
     public Optional<OrderResponse> getOrderById(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         logger.debug("Fetching order by id={}", id);
         Optional<OrderResponse> result = orderRepository.findById(id)
             .map(this::mapToOrderResponse);
@@ -96,6 +99,9 @@ public class OrderService {
     }
     
     public void deleteOrder(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Order id cannot be null");
+        }
         logger.info("Deleting order id={}", id);
         orderRepository.deleteById(id);
     }
@@ -105,6 +111,7 @@ public class OrderService {
         String productName = "Unknown";
         
         try {
+            @SuppressWarnings("unchecked")
             Map<String, Object> user = restTemplate.getForObject(
                 userServiceUrl + "/api/users/" + order.getUserId(),
                 Map.class);
@@ -116,6 +123,7 @@ public class OrderService {
         }
         
         try {
+            @SuppressWarnings("unchecked")
             Map<String, Object> product = restTemplate.getForObject(
                 productServiceUrl + "/api/products/" + order.getProductId(),
                 Map.class);
