@@ -19,22 +19,20 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-            .authorizeExchange(exchanges -> exchanges
-                .pathMatchers("/actuator/health").permitAll()
-                .anyExchange().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .build();
+                .authorizeExchange(exchanges -> exchanges
+                        .anyExchange().permitAll())
+                .httpBasic(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .build();
     }
 
     @Bean
     public MapReactiveUserDetailsService userDetailsService() {
         UserDetails user = User.builder()
-            .username("admin")
-            .password(passwordEncoder().encode("admin123"))
-            .roles("USER")
-            .build();
+                .username("admin")
+                .password(passwordEncoder().encode("admin123"))
+                .roles("USER")
+                .build();
         return new MapReactiveUserDetailsService(user);
     }
 

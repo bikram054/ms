@@ -9,15 +9,21 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/users/**
+            - Path=/user-service/**
+          filters:
+            - StripPrefix=1
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:
-            - Path=/products/**
+            - Path=/product-service/**
+          filters:
+            - StripPrefix=1
         - id: order-service
           uri: lb://ORDER-SERVICE
           predicates:
-            - Path=/orders/**
+            - Path=/order-service/**
+          filters:
+            - StripPrefix=1
 
 server:
   port: 8080
