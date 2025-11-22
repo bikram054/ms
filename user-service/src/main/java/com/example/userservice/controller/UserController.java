@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,14 +29,14 @@ public class UserController {
     private UserMapper userMapper;
 
     @GetMapping
-    public Page<UserDto> getAllUsers(Pageable pageable) {
+    public Page<UserDto> getAllUsers(@NonNull Pageable pageable) {
         logger.debug("GET /api/users called with pagination");
         return userService.getAllUsers(pageable)
                 .map(userMapper::toDto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable @NonNull Long id) {
         logger.debug("GET /api/users/{} called", id);
         return userService.getUserById(id)
                 .map(user -> {
@@ -58,7 +59,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> replaceUser(@PathVariable Long id, @Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<UserDto> replaceUser(@PathVariable @NonNull Long id,
+            @Valid @RequestBody CreateUserRequest request) {
         // PUT = full replace; reusing CreateUserRequest as it has all required fields
         try {
             User user = userMapper.toEntity(request);
@@ -72,7 +74,8 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDto> patchUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
+    public ResponseEntity<UserDto> patchUser(@PathVariable @NonNull Long id,
+            @Valid @RequestBody UpdateUserRequest request) {
         // PATCH = partial update
         try {
             // We need to fetch the user first to update it using mapper, but
@@ -112,7 +115,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable @NonNull Long id) {
         logger.info("DELETE /api/users/{} called", id);
         userService.deleteUser(id);
         logger.info("DELETE /api/users/{} completed", id);

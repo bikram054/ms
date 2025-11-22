@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import java.util.List;
+import org.springframework.lang.NonNull;
 import java.util.Optional;
 
 @Service
@@ -19,7 +19,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public Page<User> getAllUsers(Pageable pageable) {
+    public Page<User> getAllUsers(@NonNull Pageable pageable) {
         logger.debug("Fetching users with pagination");
         Page<User> page = userRepository.findAll(pageable);
         logger.debug("Fetched {} users", page.getNumberOfElements());
@@ -46,7 +46,7 @@ public class UserService {
         return saved;
     }
 
-    public User updateUser(Long id, User userDetails) {
+    public User updateUser(@NonNull Long id, User userDetails) {
         if (id == null) {
             throw new IllegalArgumentException("User id cannot be null");
         }
@@ -83,7 +83,7 @@ public class UserService {
      * Replace the user record with the provided details. This is a full replace
      * (PUT semantics) and requires required fields to be present.
      */
-    public User replaceUser(Long id, User userDetails) {
+    public User replaceUser(@NonNull Long id, User userDetails) {
         if (id == null) {
             throw new IllegalArgumentException("User id cannot be null");
         }

@@ -11,15 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.util.List;
+
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -36,7 +36,7 @@ public class OrderService {
     @Value("${product.service.url}")
     private String productServiceUrl;
 
-    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+    public Page<OrderResponse> getAllOrders(@NonNull Pageable pageable) {
         logger.debug("Fetching orders with pagination");
         Page<Order> page = orderRepository.findAll(pageable);
         logger.debug("Fetched {} orders", page.getNumberOfElements());

@@ -31,8 +31,8 @@ start_service "product-service" 8082
 start_service "order-service" 8083
 
 # 3. Edge Services
-start_service "gateway-server" 8080
+start_service "gateway-server" 9090
 
 echo -e "${BLUE}All services started!${NC}"
 echo -e "Stop all with: ${GREEN}./stop-all.sh${NC}"
-
+echo -e "View logs with: ${GREEN}tail -f **/*.log${NC}"

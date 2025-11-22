@@ -8,7 +8,7 @@ Run your Java microservices as an application in the Kubernetes cluster.
 microservices namespace
 ├── config-server (port 8888)
 ├── eureka-server (port 8761)
-├── gateway-server (port 8080) ← Entry point
+├── gateway-server (port 9090) ← Entry point
 ├── user-service (port 8081)
 ├── product-service (port 8082)
 └── order-service (port 8083)
@@ -244,7 +244,7 @@ spec:
         image: localhost:5000/gateway-server:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8080
+        - containerPort: 9090
         env:
         - name: JAVA_OPTS
           value: "-Xmx256m -Xms128m"
@@ -258,7 +258,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuator/health
-            port: 8080
+            port: 9090
           initialDelaySeconds: 60
           periodSeconds: 10
 
@@ -272,8 +272,8 @@ spec:
   selector:
     app: gateway-server
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 9090
+    targetPort: 9090
   type: ClusterIP
 
 ---
@@ -451,7 +451,7 @@ spec:
           service:
             name: gateway-server
             port:
-              number: 8080
+              number: 9090
   - host: yourdomain.com
     http:
       paths:
@@ -461,7 +461,7 @@ spec:
           service:
             name: gateway-server
             port:
-              number: 8080
+              number: 9090
 ```
 
 ### Step 5: Deploy to Kubernetes

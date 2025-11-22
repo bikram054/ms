@@ -28,7 +28,7 @@ spring:
             - StripPrefix=1
 
 server:
-  port: 8080
+  port: 9090
 
 eureka:
   client:
@@ -37,6 +37,7 @@ eureka:
   instance:
     prefer-ip-address: false
     hostname: localhost
+    nonSecurePort: 9090
 
 management:
   endpoints:

@@ -4,9 +4,10 @@ import random
 import time
 
 # Configuration
-USER_SERVICE_URL = "http://localhost:8081/api/users"
-PRODUCT_SERVICE_URL = "http://localhost:8082/api/products"
-ORDER_SERVICE_URL = "http://localhost:8083/api/orders"
+GATEWAY_URL = "http://localhost:9090"
+USER_SERVICE_URL = f"{GATEWAY_URL}/user-service/api/users"
+PRODUCT_SERVICE_URL = f"{GATEWAY_URL}/product-service/api/products"
+ORDER_SERVICE_URL = f"{GATEWAY_URL}/order-service/api/orders"
 
 NUM_USERS = 1000
 NUM_PRODUCTS = 10000
