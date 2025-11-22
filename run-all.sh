@@ -33,9 +33,8 @@ start_service "user-service" 8081
 start_service "product-service" 8082
 start_service "order-service" 8083
 
-# 3. Edge & Support Services
+# 3. Edge Services
 start_service "gateway-server" 8080
-start_service "admin-server" 8084
 
 echo -e "${BLUE}All services started!${NC}"
 echo -e "View logs with: ${GREEN}tail -f logs/*.log${NC}"

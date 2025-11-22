@@ -21,7 +21,6 @@
     <modules>
         <module>config-server</module>
         <module>eureka-server</module>
-        <module>admin-server</module>
         <module>gateway-server</module>
         <module>user-service</module>
         <module>product-service</module>

@@ -11,8 +11,7 @@ microservices namespace
 ├── gateway-server (port 8080) ← Entry point
 ├── user-service (port 8081)
 ├── product-service (port 8082)
-├── order-service (port 8083)
-└── admin-server (port 8084)
+└── order-service (port 8083)
 ```
 
 ## 📦 Directory Structure
@@ -41,7 +40,6 @@ docker build -t gateway-server:latest ./gateway-server
 docker build -t user-service:latest ./user-service
 docker build -t product-service:latest ./product-service
 docker build -t order-service:latest ./order-service
-docker build -t admin-server:latest ./admin-server
 ```
 
 **Or on Raspberry Pi directly (for ARM):**
@@ -420,54 +418,6 @@ spec:
   ports:
   - port: 8083
     targetPort: 8083
-  type: ClusterIP
-
----
-# Admin Server
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: admin-server
-  namespace: microservices
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: admin-server
-  template:
-    metadata:
-      labels:
-        app: admin-server
-    spec:
-      containers:
-      - name: admin-server
-        image: localhost:5000/admin-server:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8084
-        env:
-        - name: JAVA_OPTS
-          value: "-Xmx256m -Xms128m"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "150m"
-          limits:
-            memory: "512Mi"
-            cpu: "400m"
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: admin-server
-  namespace: microservices
-spec:
-  selector:
-    app: admin-server
-  ports:
-  - port: 8084
-    targetPort: 8084
   type: ClusterIP
 ```
 
