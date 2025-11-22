@@ -14,14 +14,11 @@ start_service() {
     echo -e "${GREEN}Starting $service_name on port $port...${NC}"
     
     cd $service_name
-    nohup mvn spring-boot:run -Dspring-boot.run.profiles=local > ../logs/$service_name.log 2>&1 &
+    mvn spring-boot:run -Dspring-boot.run.profiles=local > /dev/null 2>&1 &
     cd ..
     
-    echo -e "Started $service_name (PID: $!) - Logs: logs/$service_name.log"
+    echo -e "Started $service_name (PID: $!)"
 }
-
-# Create logs directory if it doesn't exist
-mkdir -p logs
 
 # 1. Infrastructure Services
 start_service "eureka-server" 8761
@@ -37,5 +34,5 @@ start_service "order-service" 8083
 start_service "gateway-server" 8080
 
 echo -e "${BLUE}All services started!${NC}"
-echo -e "View logs with: ${GREEN}tail -f logs/*.log${NC}"
 echo -e "Stop all with: ${GREEN}./stop-all.sh${NC}"
+
