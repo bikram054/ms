@@ -20,16 +20,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include:
+          - health
+          - info
+          - metrics
   endpoint:
     health:
       show-details: always
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
 
 ---
 spring:
@@ -44,8 +41,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"health,info,metrics
+        include: "*"
   endpoint:
     health:
       show-details: always
-```
