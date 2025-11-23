@@ -70,7 +70,8 @@ This project implements a microservices architecture with service discovery, API
 
 - **Java 21** (Temurin or similar)
 - **Maven 3.9+**
-- **Docker** (for containerized builds)
+- **Buildah** (for native image builds)
+- **k0s** (for Kubernetes deployment)
 - **GraalVM** (optional, for local native builds)
 
 ### Local Development
@@ -101,11 +102,14 @@ cd gateway-server && mvn spring-boot:run &
 
 **Option 3: Using Makefile**
 ```bash
-make build      # Build all services
-make up         # Start with Docker Compose
-make down       # Stop services
-make logs       # View logs
-make status     # Check status
+make build           # Build all services (Maven)
+make build-native    # Build single native image (requires SERVICE=name)
+make build-native-all # Build all native images
+make deploy          # Deploy to k0s
+make undeploy        # Remove from k0s
+make logs            # View logs (default: gateway-server)
+make status          # Check pod status
+make k8s-status      # Detailed k8s status
 ```
 
 ### Access Services
@@ -140,16 +144,22 @@ mvn -Pnative native:compile -pl user-service -DskipTests
 ./user-service/target/user-service
 ```
 
-**Build with Docker (using Containerfile):**
+**Build with Buildah (using Containerfile):**
 ```bash
 # Build native image for a specific service
-docker build \
+make build-native SERVICE=user-service
+
+# Or manually with buildah
+buildah bud \
   --build-arg SERVICE_NAME=user-service \
   --build-arg PORT=8081 \
   -t user-service:native \
   -f Containerfile .
 
 # Build all services
+make build-native-all
+
+# Or manually
 for service in eureka-server gateway-server user-service product-service order-service; do
   case $service in
     eureka-server) port=8761 ;;
@@ -158,7 +168,7 @@ for service in eureka-server gateway-server user-service product-service order-s
     product-service) port=8082 ;;
     order-service) port=8083 ;;
   esac
-  docker build \
+  buildah bud \
     --build-arg SERVICE_NAME=$service \
     --build-arg PORT=$port \
     -t $service:native \
@@ -189,22 +199,41 @@ make postman-test
 make perf-test
 ```
 
-## ☸️ Kubernetes Deployment
+## ☸️ Kubernetes Deployment (k0s)
 
-### Deploy to Kubernetes
+### Deploy to k0s
 
+**Using Makefile (Recommended):**
 ```bash
-# Create namespace
-kubectl apply -f k8s/namespace.yaml
-
 # Deploy all services
-kubectl apply -f k8s/
+make deploy
+
+# Check status
+make status
+make k8s-status
+
+# View logs
+make logs                      # gateway-server (default)
+make logs SERVICE=user-service # specific service
+
+# Remove deployment
+make undeploy
+
+# Complete cleanup
+make clean
+```
+
+**Manual deployment:**
+```bash
+# Create namespace and deploy
+sudo k0s kubectl apply -f k8s/namespace.yaml
+sudo k0s kubectl apply -f k8s/
 
 # Verify deployment
-kubectl get all -n microservices
+sudo k0s kubectl get all -n microservices
 
 # Check logs
-kubectl logs -n microservices -l app=gateway-server -f
+sudo k0s kubectl logs -n microservices -l app=gateway-server -f
 ```
 
 ### Using Native Images from GitHub Container Registry
@@ -266,19 +295,25 @@ curl http://localhost:8080/actuator/health
 open http://localhost:8761
 ```
 
-### Kubernetes Monitoring
+### Kubernetes Monitoring (k0s)
 ```bash
+# Quick status
+make status
+
+# Detailed status
+make k8s-status
+
 # View all services
-kubectl get all -n microservices
+sudo k0s kubectl get all -n microservices
 
 # Check pod status
-kubectl describe pod <pod-name> -n microservices
+sudo k0s kubectl describe pod <pod-name> -n microservices
 
 # View logs
-kubectl logs -n microservices -f deployment/gateway-server
+make logs SERVICE=gateway-server
 
 # Resource usage
-kubectl top pods -n microservices
+sudo k0s kubectl top pods -n microservices
 ```
 
 ## 🐛 Troubleshooting
