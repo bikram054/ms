@@ -34,6 +34,9 @@ This project implements a microservices architecture with service discovery, API
 - **product-service** (8082): Product catalog service
 - **order-service** (8083): Order processing service with circuit breaker
 
+> [!NOTE]
+> This template does not include a config-server. Services use environment variables and embedded configuration files for simplicity.
+
 ## 📦 Project Structure
 
 ```
@@ -102,14 +105,17 @@ cd gateway-server && mvn spring-boot:run &
 
 **Option 3: Using Makefile**
 ```bash
-make build           # Build all services (Maven)
-make build-native    # Build single native image (requires SERVICE=name)
+make build            # Build all services (Maven)
+make build-native     # Build single native image (requires SERVICE=name)
 make build-native-all # Build all native images
-make deploy          # Deploy to k0s
-make undeploy        # Remove from k0s
-make logs            # View logs (default: gateway-server)
-make status          # Check pod status
-make k8s-status      # Detailed k8s status
+make deploy           # Deploy to k0s (local images)
+make deploy-remote    # Deploy to k0s (remote images from ghcr.io)
+make pull-images      # Pre-pull remote images
+make update-images    # Update running deployments
+make undeploy         # Remove from k0s
+make logs             # View logs (default: gateway-server)
+make status           # Check pod status
+make k8s-status       # Detailed k8s status
 ```
 
 ### Access Services
@@ -208,26 +214,44 @@ make perf-test
 
 ## ☸️ Kubernetes Deployment (k0s)
 
-### Deploy to k0s
+### Deploy Using Prebuilt Images (Recommended)
 
-**Using Makefile (Recommended):**
+The easiest way to deploy is using prebuilt native images from GitHub Container Registry:
+
 ```bash
-# Deploy all services
+# Deploy using remote images from ghcr.io/bikram054/ms
+make deploy-remote
+
+# Or use the deployment script directly
+./deploy-remote.sh
+```
+
+This will:
+- Pull native images from `ghcr.io/bikram054/ms`
+- Deploy all microservices to k0s
+- Wait for all pods to be ready
+- Display service endpoints
+
+**Available commands:**
+```bash
+make deploy-remote    # Deploy using remote images
+make pull-images      # Pre-pull all images to k0s nodes
+make update-images    # Update deployments with latest images
+make status           # Check pod status
+make logs             # View logs (default: gateway-server)
+make undeploy         # Remove all services
+```
+
+### Deploy Using Local Images
+
+If you've built images locally:
+
+```bash
+# Build native images first
+make build-native-all
+
+# Deploy to k0s
 make deploy
-
-# Check status
-make status
-make k8s-status
-
-# View logs
-make logs                      # gateway-server (default)
-make logs SERVICE=user-service # specific service
-
-# Remove deployment
-make undeploy
-
-# Complete cleanup
-make clean
 ```
 
 **Manual deployment:**
@@ -237,17 +261,30 @@ sudo k0s kubectl apply -f k8s/namespace.yaml
 sudo k0s kubectl apply -f k8s/
 
 # Verify deployment
-sudo k0s kubectl get all -n microservices
-
-# Check logs
-sudo k0s kubectl logs -n microservices -l app=gateway-server -f
+EUREKA_PORT=$(sudo k0s kubectl get svc eureka-server -n ms -o jsonpath='{.spec.ports[0].nodePort}') k0s kubectl logs -n ms -l app=gateway-server -f
 ```
 
-### Using Native Images from GitHub Container Registry
+### Using Private GitHub Container Registry
 
-Update image references in `k8s/*.yaml`:
+If your packages are private, create an image pull secret:
+
+```bash
+# Run the setup script
+./setup-image-pull-secret.sh
+
+# Or manually create the secret
+sudo k0s kubectl create secret docker-registry ghcr-secret \
+  --docker-server=ghcr.io \
+  --docker-username=<your-github-username> \
+  --docker-password=<your-github-token> \
+  --namespace=ms
+```
+
+Then add to your deployment specs:
 ```yaml
-image: ghcr.io/<your-username>/<repo>/user-service:latest
+spec:
+  imagePullSecrets:
+  - name: ghcr-secret
 ```
 
 ### Resource Requirements
@@ -311,19 +348,42 @@ make status
 make k8s-status
 
 # View all services
-sudo k0s kubectl get all -n microservices
+sudo k0s kubectl get all -n ms
 
 # Check pod status
-sudo k0s kubectl describe pod <pod-name> -n microservices
+sudo k0s kubectl describe pod <pod-name> -n ms
 
 # View logs
 make logs SERVICE=gateway-server
 
 # Resource usage
-sudo k0s kubectl top pods -n microservices
+sudo k0s kubectl get pods -n ms
 ```
 
 ## 🐛 Troubleshooting
+
+### Image Pull Errors
+
+**Issue**: `ImagePullBackOff` or `ErrImagePull`
+```bash
+# Check pod events
+sudo k0s kubectl describe pod <pod-name> -n ms
+
+# Verify image exists
+docker pull ghcr.io/bikram054/ms/gateway-server:latest
+
+# For private registries, ensure image pull secret is created
+./setup-image-pull-secret.sh
+```
+
+**Issue**: Images not updating
+```bash
+# Force pull latest images
+make update-images
+
+# Or manually restart deployments
+sudo k0s kubectl rollout restart deployment --all -n ms
+```
 
 ### Service Discovery Issues
 ```bash
@@ -331,7 +391,7 @@ sudo k0s kubectl top pods -n microservices
 curl http://localhost:8761/eureka/apps
 
 # Verify service can reach Eureka
-kubectl exec -it <pod-name> -n microservices -- curl http://eureka-server:8761/actuator/health
+sudo k0s kubectl exec -it <pod-name> -n ms -- curl http://eureka-server:8761/actuator/health
 ```
 
 ### Native Image Build Failures
@@ -349,15 +409,15 @@ kubectl exec -it <pod-name> -n microservices -- curl http://eureka-server:8761/a
 ### Pod CrashLoopBackOff
 ```bash
 # Check events
-kubectl describe pod <pod-name> -n microservices
+sudo k0s kubectl describe pod <pod-name> -n ms
 
 # View logs
-kubectl logs <pod-name> -n microservices --previous
+sudo k0s kubectl logs <pod-name> -n ms --previous
 
 # Common fixes:
 # 1. Increase initialDelaySeconds in liveness probe
 # 2. Check EUREKA_URI environment variable
-# 3. Verify image pull secrets
+# 3. Verify image pull secrets (if using private registry)
 ```
 
 ## 🤝 Contributing

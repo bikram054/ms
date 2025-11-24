@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-server
-  namespace: microservices
+  namespace: ms
 spec:
   replicas: 2
   selector:
@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: gateway-server
-        image: gateway-server:latest
-        imagePullPolicy: Never
+        image: ghcr.io/bikram054/ms/gateway-server:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:
@@ -32,8 +32,8 @@ spec:
           httpGet:
             path: /actuator/health
             port: 8080
-          initialDelaySeconds: 20
-          periodSeconds: 5
+          initialDelaySeconds: 5
+          periodSeconds: 2
       initContainers:
       - name: wait-for-dependencies
         image: busybox:1.35
@@ -43,7 +43,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: gateway-server
-  namespace: microservices
+  namespace: ms
 spec:
   selector:
     app: gateway-server

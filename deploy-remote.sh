@@ -63,7 +63,7 @@ echo -e "${GREEN}✓ Order Service deployed${NC}"
 
 echo ""
 echo -e "${YELLOW}Waiting for deployments to be ready (timeout: 5 minutes)...${NC}"
-if sudo k0s kubectl wait --for=condition=available --timeout=300s deployment --all -n microservices; then
+if sudo k0s kubectl wait --for=condition=available --timeout=300s deployment --all -n ms; then
     echo -e "${GREEN}✓ All deployments are ready!${NC}"
 else
     echo -e "${RED}Warning: Some deployments may not be ready yet${NC}"
@@ -74,13 +74,13 @@ echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Deployment Status${NC}"
 echo -e "${GREEN}========================================${NC}"
-sudo k0s kubectl get pods -n microservices
+sudo k0s kubectl get pods -n ms
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Services${NC}"
 echo -e "${GREEN}========================================${NC}"
-sudo k0s kubectl get svc -n microservices
+sudo k0s kubectl get svc -n ms
 
 echo ""
 echo -e "${YELLOW}To view logs:${NC} make logs SERVICE=<service-name>"
@@ -89,13 +89,13 @@ echo -e "${YELLOW}To undeploy:${NC} make undeploy"
 echo ""
 
 # Get gateway NodePort
-GATEWAY_PORT=$(sudo k0s kubectl get svc gateway-server -n microservices -o jsonpath='{.spec.ports[0].nodePort}' 2>/dev/null || echo "N/A")
+GATEWAY_PORT=$(sudo k0s kubectl get svc gateway-server -n ms -o jsonpath='{.spec.ports[0].nodePort}' 2>/dev/null || echo "N/A")
 if [ "$GATEWAY_PORT" != "N/A" ]; then
     echo -e "${GREEN}Gateway is accessible at: http://localhost:$GATEWAY_PORT${NC}"
 fi
 
 # Get Eureka NodePort
-EUREKA_PORT=$(sudo k0s kubectl get svc eureka-server -n microservices -o jsonpath='{.spec.ports[0].nodePort}' 2>/dev/null || echo "N/A")
+EUREKA_PORT=$(sudo k0s kubectl get svc eureka-server -n ms -o jsonpath='{.spec.ports[0].nodePort}' 2>/dev/null || echo "N/A")
 if [ "$EUREKA_PORT" != "N/A" ]; then
     echo -e "${GREEN}Eureka Dashboard: http://localhost:$EUREKA_PORT${NC}"
 fi
