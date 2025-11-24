@@ -125,7 +125,7 @@ populate-data:
 	@python3 tests/populate_data.py
 deploy-traefik:
 	@echo "Deploying Traefik gateway..."
-	@sudo k0s kubectl apply -f k8s/traefik.yaml
+	@k0s kubectl apply -f k8s/traefik.yaml
 
 
 build-image:
@@ -173,7 +173,7 @@ load-images:
 	@for service in $(SERVICES); do \
 		echo "Loading $$service..."; \
 		buildah push $$service:latest oci-archive:/tmp/$$service.tar && \
-		sudo k0s ctr images import /tmp/$$service.tar; \
+		k0s ctr images import /tmp/$$service.tar; \
 		rm -f /tmp/$$service.tar; \
 	done
 	@echo "All images loaded!"
@@ -181,8 +181,8 @@ load-images:
 
 deploy:
 	@echo "Deploying to k0s Kubernetes (using local images)..."
-	sudo k0s kubectl apply -f k8s/namespace.yaml
-	sudo k0s kubectl apply -f k8s/
+	k0s kubectl apply -f k8s/namespace.yaml
+	k0s kubectl apply -f k8s/
 
 deploy-remote:
 	@echo "Deploying to k0s using remote images from ghcr.io/bikram054/ms..."
@@ -193,20 +193,20 @@ deploy-remote:
 		exit 1; \
 	fi
 	@echo "Creating namespace..."
-	@sudo k0s kubectl apply -f k8s/namespace.yaml
+	@k0s kubectl apply -f k8s/namespace.yaml
 	@echo "Pre-pulling images..."
 	@for service in $(SERVICES); do \
 		echo "Pulling $$service..."; \
-		sudo k0s ctr images pull ghcr.io/bikram054/ms/$$service:latest > /dev/null 2>&1 || true; \
-		sudo k0s ctr images tag ghcr.io/bikram054/ms/$$service:latest $$service:latest > /dev/null 2>&1 || true; \
+		k0s ctr images pull ghcr.io/bikram054/ms/$$service:latest > /dev/null 2>&1 || true; \
+		k0s ctr images tag ghcr.io/bikram054/ms/$$service:latest $$service:latest > /dev/null 2>&1 || true; \
 	done
 	@echo "Deploying microservices..."
 
-	@sudo k0s kubectl apply -f k8s/user-service.yaml
-	@sudo k0s kubectl apply -f k8s/product-service.yaml
-	@sudo k0s kubectl apply -f k8s/order-service.yaml
+	@k0s kubectl apply -f k8s/user-service.yaml
+	@k0s kubectl apply -f k8s/product-service.yaml
+	@k0s kubectl apply -f k8s/order-service.yaml
 	@echo "Waiting for deployments to be ready..."
-	@if sudo k0s kubectl wait --for=condition=available --timeout=300s deployment --all -n ms; then \
+	@if k0s kubectl wait --for=condition=available --timeout=300s deployment --all -n ms; then \
 		echo "All deployments are ready!"; \
 	else \
 		echo "Warning: Some deployments may not be ready yet"; \
@@ -217,41 +217,41 @@ pull-images:
 	@echo "Pre-pulling images from ghcr.io/bikram054/ms to k0s nodes..."
 	@for service in $(SERVICES); do \
 		echo "Pulling $$service..."; \
-		sudo k0s ctr images pull ghcr.io/bikram054/ms/$$service:latest || true; \
+		k0s ctr images pull ghcr.io/bikram054/ms/$$service:latest || true; \
 	done
 	@echo "All images pulled!"
 
 
 update-images:
 	@echo "Updating deployments with latest images..."
-	sudo k0s kubectl rollout restart deployment --all -n ms
+	k0s kubectl rollout restart deployment --all -n ms
 	@echo "Waiting for rollout to complete..."
-	sudo k0s kubectl rollout status deployment --all -n ms
+	k0s kubectl rollout status deployment --all -n ms
 	@echo "Update complete!"
 
 undeploy:
 	@echo "Removing microservices from k0s..."
-	sudo k0s kubectl delete -f k8s/ --ignore-not-found=true
+	k0s kubectl delete -f k8s/ --ignore-not-found=true
 	@echo "Microservices removed!"
 
 logs:
 	@if [ -z "$(SERVICE)" ]; then \
 		echo "Showing logs..."; \
 		echo "Use: make logs SERVICE=<service-name> to view specific service"; \
-		sudo k0s kubectl logs -n ms -l app=user-service -f; \
+		k0s kubectl logs -n ms -l app=user-service -f; \
 	else \
 		echo "Showing logs for $(SERVICE)..."; \
-		sudo k0s kubectl logs -n ms -l app=$(SERVICE) -f; \
+		k0s kubectl logs -n ms -l app=$(SERVICE) -f; \
 	fi
 
 k8s-status:
 	@echo "=== Kubernetes Resources in ms namespace ==="
-	@sudo k0s kubectl get all -n ms
+	@k0s kubectl get all -n ms
 	@echo ""
 	@echo "=== Pod Details ==="
-	@sudo k0s kubectl get pods -n ms -o wide
+	@k0s kubectl get pods -n ms -o wide
 
 clean:
 	@echo "Cleaning up ms namespace..."
-	sudo k0s kubectl delete namespace ms --ignore-not-found=true
+	k0s kubectl delete namespace ms --ignore-not-found=true
 	@echo "Cleanup complete!"

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: product-service
-        image: product-service:latest
+        image: ghcr.io/bikram054/ms/product-service:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8082

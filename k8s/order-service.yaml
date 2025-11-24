@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: order-service
-        image: order-service:latest
+        image: ghcr.io/bikram054/ms/order-service:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8083
