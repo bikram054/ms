@@ -101,7 +101,6 @@ run-all:
 	@trap 'echo "\nStopping all services..."; pkill -f "spring-boot:run"; exit' INT; \
 	for service in $(SERVICES); do \
 		case $$service in \
-			gateway-server) port=8080 ;; \
 			user-service) port=8081 ;; \
 			product-service) port=8082 ;; \
 			order-service) port=8083 ;; \
@@ -119,7 +118,7 @@ run-all:
 stop-all:
 	@echo "Stopping all locally running services..."
 	@pkill -f "spring-boot:run" || echo "No services running"
-	@rm -f /tmp/gateway-server.log /tmp/user-service.log /tmp/product-service.log /tmp/order-service.log
+	@rm -f /tmp/user-service.log /tmp/product-service.log /tmp/order-service.log
 	@echo "All services stopped and logs cleaned up!"
 populate-data:
 	@echo "Populating test data..."
@@ -137,7 +136,6 @@ build-image:
 		exit 1; \
 	fi
 	@case $(SERVICE) in \
-		gateway-server) PORT=8080 ;; \
 		user-service) PORT=8081 ;; \
 		product-service) PORT=8082 ;; \
 		order-service) PORT=8083 ;; \
@@ -155,7 +153,6 @@ build-images:
 	@echo "Building JVM images for all services..."
 	@for service in $(SERVICES); do \
 		case $$service in \
-			gateway-server) port=8080 ;; \
 			user-service) port=8081 ;; \
 			product-service) port=8082 ;; \
 			order-service) port=8083 ;; \
@@ -239,9 +236,9 @@ undeploy:
 
 logs:
 	@if [ -z "$(SERVICE)" ]; then \
-		echo "Showing logs for gateway-server (default)..."; \
+		echo "Showing logs..."; \
 		echo "Use: make logs SERVICE=<service-name> to view specific service"; \
-		sudo k0s kubectl logs -n ms -l app=gateway-server -f; \
+		sudo k0s kubectl logs -n ms -l app=user-service -f; \
 	else \
 		echo "Showing logs for $(SERVICE)..."; \
 		sudo k0s kubectl logs -n ms -l app=$(SERVICE) -f; \
