@@ -15,4 +15,5 @@ ARG PORT
 WORKDIR /app
 COPY --from=builder /app/${SERVICE_NAME}/target/${SERVICE_NAME} .
 EXPOSE ${PORT}
-ENTRYPOINT ["/bin/sh", "-c", "/app/${SERVICE_NAME}"]
+ENV SERVICE_NAME=${SERVICE_NAME}
+ENTRYPOINT ["/bin/sh", "-c", "/app/$SERVICE_NAME"]
