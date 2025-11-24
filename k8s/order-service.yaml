@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: order-service
-        image: order-service:latest
-        imagePullPolicy: Never
+        image: ghcr.io/bikram054/ms/order-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8083
         env:
@@ -35,9 +35,9 @@ spec:
           initialDelaySeconds: 20
           periodSeconds: 5
       initContainers:
-      - name: wait-for-services
+      - name: wait-for-eureka
         image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z user-service 8081 && nc -z product-service 8082; do sleep 2; done']
+        command: ['sh', '-c', 'until nc -z eureka-server 8761; do sleep 2; done']
 ---
 apiVersion: v1
 kind: Service
