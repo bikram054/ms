@@ -1,3 +1,6 @@
+# Workflow to build specific services based on changed files
+# This builds ALL services on main branch, but only changed services on PRs
+
 name: Native Build
 
 on:
@@ -5,12 +8,52 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      services:
+        description: 'Services to build (comma-separated: eureka-server,gateway-server,user-service,product-service,order-service or "all")'
+        required: false
+        default: 'all'
 
 env:
   REGISTRY: ghcr.io
 
 jobs:
+  # Detect which services changed
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      eureka: ${{ steps.filter.outputs.eureka }}
+      gateway: ${{ steps.filter.outputs.gateway }}
+      user: ${{ steps.filter.outputs.user }}
+      product: ${{ steps.filter.outputs.product }}
+      order: ${{ steps.filter.outputs.order }}
+      common: ${{ steps.filter.outputs.common }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            eureka:
+              - 'eureka-server/**'
+            gateway:
+              - 'gateway-server/**'
+            user:
+              - 'user-service/**'
+            product:
+              - 'product-service/**'
+            order:
+              - 'order-service/**'
+            common:
+              - 'pom.xml'
+              - 'Containerfile'
+              - 'Containerfile.eureka-jvm'
+              - '.github/workflows/**'
+
   build-native:
+    needs: detect-changes
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -20,14 +63,23 @@ jobs:
         include:
           - service: eureka-server
             port: 8761
+            changed: ${{ needs.detect-changes.outputs.eureka == 'true' || needs.detect-changes.outputs.common == 'true' || github.event_name == 'push' || github.event.inputs.services == 'all' || contains(github.event.inputs.services, 'eureka-server') }}
           - service: gateway-server
             port: 8080
+            changed: ${{ needs.detect-changes.outputs.gateway == 'true' || needs.detect-changes.outputs.common == 'true' || github.event_name == 'push' || github.event.inputs.services == 'all' || contains(github.event.inputs.services, 'gateway-server') }}
           - service: user-service
             port: 8081
+            changed: ${{ needs.detect-changes.outputs.user == 'true' || needs.detect-changes.outputs.common == 'true' || github.event_name == 'push' || github.event.inputs.services == 'all' || contains(github.event.inputs.services, 'user-service') }}
           - service: product-service
             port: 8082
+            changed: ${{ needs.detect-changes.outputs.product == 'true' || needs.detect-changes.outputs.common == 'true' || github.event_name == 'push' || github.event.inputs.services == 'all' || contains(github.event.inputs.services, 'product-service') }}
           - service: order-service
             port: 8083
+            changed: ${{ needs.detect-changes.outputs.order == 'true' || needs.detect-changes.outputs.common == 'true' || github.event_name == 'push' || github.event.inputs.services == 'all' || contains(github.event.inputs.services, 'order-service') }}
+    
+    # Skip if service hasn't changed
+    if: matrix.changed == 'true'
+    
     steps:
     - uses: actions/checkout@v4
     
