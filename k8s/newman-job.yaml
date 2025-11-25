@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: newman-test
+  namespace: ms
+spec:
+  template:
+    spec:
+      containers:
+      - name: newman
+        image: postman/newman:alpine
+        command: ["newman", "run", "/etc/newman/api-tests.postman_collection.json", "-e", "/etc/newman/api-environment.postman_environment.json", "--env-var", "gatewayBaseUrl=http://traefik"]
+        volumeMounts:
+        - name: test-config
+          mountPath: /etc/newman
+      restartPolicy: Never
+      volumes:
+      - name: test-config
+        configMap:
+          name: newman-tests
+  backoffLimit: 1

@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: jmeter-test
+  namespace: ms
+spec:
+  template:
+    spec:
+      containers:
+      - name: jmeter
+        image: justb4/jmeter:5.5
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Setting up test data..."
+            mkdir -p /tests/data
+            cp /config/test-plan.jmx /tests/test-plan.jmx
+            cp /config/users.csv /tests/data/users.csv
+            cp /config/products.csv /tests/data/products.csv
+            cp /config/orders.csv /tests/data/orders.csv
+            
+            echo "Running JMeter test..."
+            jmeter -n -t /tests/test-plan.jmx \
+              -Jgateway.host=traefik \
+              -Jgateway.port=80 \
+              -Jtestdir=/tests \
+              -l /tests/results.jtl
+            
+            echo "Test finished. Results:"
+            cat /tests/results.jtl
+        volumeMounts:
+        - name: test-config
+          mountPath: /config
+      restartPolicy: Never
+      volumes:
+      - name: test-config
+        configMap:
+          name: jmeter-tests
+  backoffLimit: 1

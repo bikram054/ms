@@ -38,11 +38,18 @@
         </CSVDataSet>
         <hashTree/>
 
+        <!-- Think Time -->
+        <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Uniform Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">300</stringProp>
+          <stringProp name="RandomTimer.range">200</stringProp>
+        </UniformRandomTimer>
+        <hashTree/>
+
         <!-- HTTP Authorization Manager -->
         <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
           <collectionProp name="AuthManager.auth_list">
             <elementProp name="" elementType="Authorization">
-              <stringProp name="Authorization.url">http://${__P(gateway.host,gateway-server)}:${__P(gateway.port,8080)}</stringProp>
+              <stringProp name="Authorization.url">http://${__P(gateway.host,localhost)}:${__P(gateway.port,30836)}</stringProp>
               <stringProp name="Authorization.username">${__P(auth.username,admin)}</stringProp>
               <stringProp name="Authorization.password">${__P(auth.password,password)}</stringProp>
               <stringProp name="Authorization.domain"></stringProp>
@@ -68,8 +75,8 @@
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
-          <stringProp name="HTTPSampler.domain">${__P(gateway.host,gateway-server)}</stringProp>
-          <stringProp name="HTTPSampler.port">${__P(gateway.port,8080)}</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(gateway.host,localhost)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(gateway.port,30836)}</stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
           <stringProp name="HTTPSampler.path"></stringProp>
         </ConfigTestElement>
@@ -93,12 +100,15 @@
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST create user" enabled="true">
           <stringProp name="HTTPSampler.path">/users</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.postBodyRaw">true</stringProp>
-          <elementProp name="PostBodyRaw" elementType="BeanShellSampler">
-            <stringProp name="script">{"name":"${name}","email":"${email}","phone":"${phone}"}</stringProp>
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"name":"${name}","email":"${email}","phone":"${phone}"}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
@@ -106,9 +116,15 @@
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="PUT update user" enabled="true">
           <stringProp name="HTTPSampler.path">/users/${userId}</stringProp>
           <stringProp name="HTTPSampler.method">PUT</stringProp>
-          <stringProp name="HTTPSampler.postBodyRaw">true</stringProp>
-          <elementProp name="PostBodyRaw" elementType="BeanShellSampler">
-            <stringProp name="script">{"name":"${name}_updated","email":"${email}","phone":"${phone}"}</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"name":"${name}_updated","email":"${email}","phone":"${phone}"}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
@@ -146,7 +162,7 @@
         <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
           <collectionProp name="AuthManager.auth_list">
             <elementProp name="" elementType="Authorization">
-              <stringProp name="Authorization.url">http://${__P(gateway.host,gateway-server)}:${__P(gateway.port,8080)}</stringProp>
+              <stringProp name="Authorization.url">http://${__P(gateway.host,localhost)}:${__P(gateway.port,30836)}</stringProp>
               <stringProp name="Authorization.username">${__P(auth.username,admin)}</stringProp>
               <stringProp name="Authorization.password">${__P(auth.password,password)}</stringProp>
               <stringProp name="Authorization.domain"></stringProp>
@@ -160,8 +176,8 @@
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
-          <stringProp name="HTTPSampler.domain">${__P(gateway.host,gateway-server)}</stringProp>
-          <stringProp name="HTTPSampler.port">${__P(gateway.port,8080)}</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(gateway.host,localhost)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(gateway.port,30836)}</stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
           <stringProp name="HTTPSampler.path"></stringProp>
         </ConfigTestElement>
@@ -182,9 +198,15 @@
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST create product" enabled="true">
           <stringProp name="HTTPSampler.path">/products</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
-          <stringProp name="HTTPSampler.postBodyRaw">true</stringProp>
-          <elementProp name="PostBodyRaw" elementType="BeanShellSampler">
-            <stringProp name="script">{"name":"${name}","description":"${description}","price":${price}}</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"name":"${name}","description":"${description}","price":${price}}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
@@ -192,9 +214,15 @@
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="PUT update product" enabled="true">
           <stringProp name="HTTPSampler.path">/products/${productId}</stringProp>
           <stringProp name="HTTPSampler.method">PUT</stringProp>
-          <stringProp name="HTTPSampler.postBodyRaw">true</stringProp>
-          <elementProp name="PostBodyRaw" elementType="BeanShellSampler">
-            <stringProp name="script">{"name":"${name}_updated","description":"${description}","price":${price}}</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"name":"${name}_updated","description":"${description}","price":${price}}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
@@ -232,7 +260,7 @@
         <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
           <collectionProp name="AuthManager.auth_list">
             <elementProp name="" elementType="Authorization">
-              <stringProp name="Authorization.url">http://${__P(gateway.host,gateway-server)}:${__P(gateway.port,8080)}</stringProp>
+              <stringProp name="Authorization.url">http://${__P(gateway.host,localhost)}:${__P(gateway.port,30836)}</stringProp>
               <stringProp name="Authorization.username">${__P(auth.username,admin)}</stringProp>
               <stringProp name="Authorization.password">${__P(auth.password,password)}</stringProp>
               <stringProp name="Authorization.domain"></stringProp>
@@ -246,8 +274,8 @@
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
-          <stringProp name="HTTPSampler.domain">${__P(gateway.host,gateway-server)}</stringProp>
-          <stringProp name="HTTPSampler.port">${__P(gateway.port,8080)}</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(gateway.host,localhost)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(gateway.port,30836)}</stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
           <stringProp name="HTTPSampler.path"></stringProp>
         </ConfigTestElement>
@@ -268,9 +296,15 @@
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST create order" enabled="true">
           <stringProp name="HTTPSampler.path">/orders</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
-          <stringProp name="HTTPSampler.postBodyRaw">true</stringProp>
-          <elementProp name="PostBodyRaw" elementType="BeanShellSampler">
-            <stringProp name="script">{"userId":${userId},"productId":${productId},"quantity":${quantity}}</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"userId":${userId},"productId":${productId},"quantity":${quantity}}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>

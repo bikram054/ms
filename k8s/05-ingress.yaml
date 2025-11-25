@@ -12,19 +12,13 @@ spec:
       services:
         - name: user-service
           port: 8081
-      middlewares:
-        - name: strip-users
     - match: PathPrefix(`/products`)
       kind: Rule
       services:
         - name: product-service
           port: 8082
-      middlewares:
-        - name: strip-products
     - match: PathPrefix(`/orders`)
       kind: Rule
       services:
         - name: order-service
           port: 8083
-      middlewares:
-        - name: strip-orders

@@ -165,6 +165,44 @@ make postman-test
 make perf-test
 ```
 
+### Run Tests in Kubernetes
+
+**Performance Tests (JMeter):**
+```bash
+# 1. Create ConfigMap with test plan and data
+k0s kubectl create configmap jmeter-tests -n ms \
+  --from-file=tests/performance-tests/test-plan.jmx \
+  --from-file=tests/performance-tests/data/
+
+# 2. Run the Job
+k0s kubectl apply -f k8s/jmeter-job.yaml
+
+# 3. View logs/results
+k0s kubectl logs -n ms job/jmeter-test -f
+
+# Cleanup (to run again)
+k0s kubectl delete job jmeter-test -n ms
+k0s kubectl delete configmap jmeter-tests -n ms
+```
+
+**Functional Tests (Newman):**
+```bash
+# 1. Create ConfigMap with collection and environment
+k0s kubectl create configmap newman-tests -n ms \
+  --from-file=tests/functional-tests/api-tests.postman_collection.json \
+  --from-file=tests/functional-tests/api-environment.postman_environment.json
+
+# 2. Run the Job
+k0s kubectl apply -f k8s/newman-job.yaml
+
+# 3. View logs/results
+k0s kubectl logs -n ms job/newman-test
+
+# Cleanup (to run again)
+k0s kubectl delete job newman-test -n ms
+k0s kubectl delete configmap newman-tests -n ms
+```
+
 ## ☸️ Kubernetes Deployment (k0s)
 
 ### Deploy Using Prebuilt Images (Recommended)
