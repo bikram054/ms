@@ -31,7 +31,6 @@ help:
 	@echo ""
 	@echo "🚀 Deployment Targets:"
 	@echo "  make deploy             - Deploy using local images"
-	@echo "  make deploy-remote      - Deploy using remote images from ghcr.io"
 	@echo "  make load-images        - Load local images into k0s"
 	@echo "  make pull-images        - Pull remote images into k0s"
 	@echo "  make update-images      - Restart deployments with latest images"
@@ -180,53 +179,26 @@ load-images:
 
 
 deploy:
-	@echo "Deploying to k0s Kubernetes (using local images)..."
-	k0s kubectl apply -f k8s/namespace.yaml
+	@echo "Deploying to k0s Kubernetes"
 	k0s kubectl apply -f k8s/
 
-deploy-remote:
-	@echo "Deploying to k0s using remote images from ghcr.io/bikram054/ms..."
-	@echo "Checking k0s status..."
-	@if ! sudo k0s status > /dev/null 2>&1; then \
-		echo "Error: k0s is not running"; \
-		echo "Please start k0s first with: sudo k0s start"; \
-		exit 1; \
-	fi
-	@echo "Creating namespace..."
-	@k0s kubectl apply -f k8s/namespace.yaml
-	@echo "Pre-pulling images..."
-	@for service in $(SERVICES); do \
-		echo "Pulling $$service..."; \
-		k0s ctr images pull ghcr.io/bikram054/ms/$$service:latest > /dev/null 2>&1 || true; \
-		k0s ctr images tag ghcr.io/bikram054/ms/$$service:latest $$service:latest > /dev/null 2>&1 || true; \
-	done
-	@echo "Deploying microservices..."
-
-	@k0s kubectl apply -f k8s/user-service.yaml
-	@k0s kubectl apply -f k8s/product-service.yaml
-	@k0s kubectl apply -f k8s/order-service.yaml
-	@echo "Waiting for deployments to be ready..."
-	@if k0s kubectl wait --for=condition=available --timeout=300s deployment --all -n ms; then \
-		echo "All deployments are ready!"; \
-	else \
-		echo "Warning: Some deployments may not be ready yet"; \
-	fi
-	@echo "Deployment complete!"
 
 pull-images:
 	@echo "Pre-pulling images from ghcr.io/bikram054/ms to k0s nodes..."
 	@for service in $(SERVICES); do \
 		echo "Pulling $$service..."; \
-		k0s ctr images pull ghcr.io/bikram054/ms/$$service:latest || true; \
+		sudo k0s ctr images pull ghcr.io/bikram054/ms/$$service:latest || true; \
 	done
 	@echo "All images pulled!"
 
 
 update-images:
 	@echo "Updating deployments with latest images..."
-	k0s kubectl rollout restart deployment --all -n ms
+	k0s kubectl rollout restart deployment -n ms
 	@echo "Waiting for rollout to complete..."
-	k0s kubectl rollout status deployment --all -n ms
+	k0s kubectl rollout status deployment/order-service -n ms
+	k0s kubectl rollout status deployment/product-service -n ms
+	k0s kubectl rollout status deployment/user-service -n ms
 	@echo "Update complete!"
 
 undeploy:

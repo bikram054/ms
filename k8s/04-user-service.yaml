@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: user-service:latest
-        imagePullPolicy: IfNotPresent
+        image: ghcr.io/bikram054/ms/user-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8081
         env:
