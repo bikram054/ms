@@ -11,7 +11,7 @@ COPY product-service/pom.xml product-service/
 COPY order-service/pom.xml order-service/
 RUN chmod +x mvnw
 # Download all dependencies (this layer will be cached)
-RUN ./mvnw dependency:go-offline -DskipTests || true
+RUN ./mvnw -B -T 1C dependency:go-offline -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn || true
 
 # Stage 2: Build native image with cached dependencies
 FROM ghcr.io/graalvm/native-image-community:21 AS native-builder
@@ -26,7 +26,7 @@ COPY --from=deps /root/.m2 /root/.m2
 COPY . .
 RUN chmod +x mvnw
 # Build native image (dependencies already cached)
-RUN ./mvnw -Pnative native:compile -pl ${SERVICE_NAME} -DskipTests
+RUN ./mvnw -B -T 1C -Pnative native:compile -pl ${SERVICE_NAME} -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
 # Stage 3: Native Runtime image
 FROM ubuntu:noble AS native-runtime
