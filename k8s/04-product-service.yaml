@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: product-service
   namespace: ms
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: order-service
+      app: product-service
   template:
     metadata:
       labels:
-        app: order-service
+        app: product-service
     spec:
       containers:
-      - name: order-service
-        image: ghcr.io/bikram054/ms/order-service:latest
+      - name: product-service
+        image: product-service:latest
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8083
+        - containerPort: 8082
         env:
         - name: JAVA_TOOL_OPTIONS
           value: "-XX:TieredStopAtLevel=1 -Xmx256m"
@@ -28,24 +28,24 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuator/health
-            port: 8083
+            port: 8082
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /actuator/health
-            port: 8083
+            port: 8082
           initialDelaySeconds: 5
           periodSeconds: 2
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: order-service
+  name: product-service
   namespace: ms
 spec:
   selector:
-    app: order-service
+    app: product-service
   ports:
-  - port: 8083
-    targetPort: 8083
+  - port: 8082
+    targetPort: 8082

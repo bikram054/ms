@@ -1,7 +1,7 @@
 # Workflow to build specific services based on changed files
 # This builds ALL services on main branch, but only changed services on PRs
 
-name: Native Build
+name: Build
 
 on:
   push:
@@ -49,7 +49,7 @@ jobs:
   prepare-deps:
     needs: detect-changes
     # Run if any native service or common files changed
-    if: needs.detect-changes.outputs.common == 'true' || needs.detect-changes.outputs.user == 'true' || needs.detect-changes.outputs.product == 'true' || needs.detect-changes.outputs.order == 'true' || github.event_name == 'push' || github.event.inputs.services == 'all'
+    if: needs.detect-changes.outputs.common == 'true' || needs.detect-changes.outputs.user == 'true' || needs.detect-changes.outputs.product == 'true' || needs.detect-changes.outputs.order == 'true' || github.event.inputs.services == 'all'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -93,11 +93,9 @@ jobs:
         # Determine if this service should be built
         SHOULD_BUILD="false"
         
-        # Check if it's a push to main (build all)
-        if [ "${{ github.event_name }}" = "push" ]; then
-          SHOULD_BUILD="true"
+
         # Check if manual dispatch with "all"
-        elif [ "${{ github.event.inputs.services }}" = "all" ]; then
+        if [ "${{ github.event.inputs.services }}" = "all" ]; then
           SHOULD_BUILD="true"
         # Check if manual dispatch contains this service
         elif echo "${{ github.event.inputs.services }}" | grep -q "${{ matrix.service }}"; then
