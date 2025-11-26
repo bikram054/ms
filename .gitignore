@@ -37,12 +37,19 @@ logs/
 docker-compose.override.yml
 
 # Performance Tests
-performance-tests/results/
-performance-tests/*.jtl
-performance-tests/*.log
+tests/performance-tests/results/
+tests/performance-tests/*.jtl
+tests/performance-tests/*.log
 
 # Config Repository
 config-repo/
 
 # Antigravity
 .gemini/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.pytest_cache/

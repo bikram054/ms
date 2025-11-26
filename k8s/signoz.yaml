@@ -1,0 +1,311 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  namespace: ms
+  labels:
+    app: zookeeper
+spec:
+  ports:
+  - port: 2181
+    name: client
+  selector:
+    app: zookeeper
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper
+  namespace: ms
+  labels:
+    app: zookeeper
+spec:
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper
+        image: zookeeper:3.9
+        ports:
+        - containerPort: 2181
+        env:
+        - name: ZOO_4LW_COMMANDS_WHITELIST
+          value: "*"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse
+  namespace: ms
+  labels:
+    app: clickhouse
+spec:
+  ports:
+  - port: 8123
+    name: http
+  - port: 9000
+    name: tcp
+  selector:
+    app: clickhouse
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickhouse
+  namespace: ms
+  labels:
+    app: clickhouse
+spec:
+  selector:
+    matchLabels:
+      app: clickhouse
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+    spec:
+      containers:
+      - name: clickhouse
+        image: clickhouse/clickhouse-server:24.3
+        ports:
+        - containerPort: 8123
+        - containerPort: 9000
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        volumeMounts:
+        - name: clickhouse-config
+          mountPath: /etc/clickhouse-server/config.xml
+          subPath: config.xml
+        - name: clickhouse-config
+          mountPath: /etc/clickhouse-server/users.xml
+          subPath: users.xml
+      volumes:
+      - name: clickhouse-config
+        configMap:
+          name: clickhouse-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-config
+  namespace: ms
+data:
+  config.xml: |
+    <clickhouse>
+        <logger>
+            <level>trace</level>
+            <log>/var/log/clickhouse-server/clickhouse-server.log</log>
+            <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
+            <size>1000M</size>
+            <count>10</count>
+            <console>1</console>
+        </logger>
+        <http_port>8123</http_port>
+        <tcp_port>9000</tcp_port>
+        <listen_host>0.0.0.0</listen_host>
+        <path>/var/lib/clickhouse/</path>
+        <tmp_path>/var/lib/clickhouse/tmp/</tmp_path>
+        <user_files_path>/var/lib/clickhouse/user_files/</user_files_path>
+        <mark_cache_size>5368709120</mark_cache_size>
+        <mmap_cache_size>1000</mmap_cache_size>
+        <uncompressed_cache_size>8589934592</uncompressed_cache_size>
+        <mlock_executable>false</mlock_executable>
+        <user_directories>
+            <users_xml>
+                <path>users.xml</path>
+            </users_xml>
+            <local_directory>
+                <path>/var/lib/clickhouse/access/</path>
+            </local_directory>
+        </user_directories>
+        <remote_servers>
+            <cluster>
+                <shard>
+                    <replica>
+                        <host>127.0.0.1</host>
+                        <port>9000</port>
+                    </replica>
+                </shard>
+            </cluster>
+        </remote_servers>
+        <zookeeper>
+            <node>
+                <host>zookeeper</host>
+                <port>2181</port>
+            </node>
+        </zookeeper>
+        <distributed_ddl>
+            <path>/clickhouse/task_queue/ddl</path>
+        </distributed_ddl>
+    </clickhouse>
+  users.xml: |
+    <clickhouse>
+        <profiles>
+            <default>
+            </default>
+        </profiles>
+        <users>
+            <default>
+                <password_sha256_hex>2363a050d8baa4c7f94e6c4bd58edc112e336f58815f1417a73967c9535e40dc</password_sha256_hex>
+                <networks>
+                    <ip>::/0</ip>
+                </networks>
+                <profile>default</profile>
+                <quota>default</quota>
+            </default>
+            <otel>
+                <password_sha256_hex>2363a050d8baa4c7f94e6c4bd58edc112e336f58815f1417a73967c9535e40dc</password_sha256_hex>
+                <networks>
+                    <ip>::/0</ip>
+                </networks>
+                <profile>default</profile>
+                <quota>default</quota>
+            </otel>
+        </users>
+        <quotas>
+            <default>
+            </default>
+        </quotas>
+    </clickhouse>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: signoz
+  namespace: ms
+  labels:
+    app: signoz
+spec:
+  ports:
+  - port: 3301
+    name: ui
+  - port: 8080
+    name: api
+  selector:
+    app: signoz
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signoz
+  namespace: ms
+  labels:
+    app: signoz
+spec:
+  selector:
+    matchLabels:
+      app: signoz
+  template:
+    metadata:
+      labels:
+        app: signoz
+    spec:
+      containers:
+      - name: signoz
+        image: signoz/signoz:v0.84.0
+        ports:
+        - containerPort: 3301
+        - containerPort: 8080
+        env:
+        - name: ClickHouseUrl
+          value: "tcp://clickhouse:9000?username=default&password=signoz"
+        - name: STORAGE
+          value: "clickhouse"
+        - name: GIGABYTES_OF_FREE_DISK_REQUIRED
+          value: "0"
+        volumeMounts:
+        - name: signoz-db
+          mountPath: /var/lib/signoz
+      volumes:
+      - name: signoz-db
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: signoz-otel-collector
+  namespace: ms
+  labels:
+    app: signoz-otel-collector
+spec:
+  ports:
+  - port: 4317
+    name: grpc
+  - port: 4318
+    name: http
+  selector:
+    app: signoz-otel-collector
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signoz-otel-collector
+  namespace: ms
+  labels:
+    app: signoz-otel-collector
+spec:
+  selector:
+    matchLabels:
+      app: signoz-otel-collector
+  template:
+    metadata:
+      labels:
+        app: signoz-otel-collector
+    spec:
+      containers:
+      - name: otel-collector
+        image: signoz/signoz-otel-collector:0.102.1
+        ports:
+        - containerPort: 4317
+        - containerPort: 4318
+        args: ["--config", "/etc/otel-collector-config.yaml"]
+        volumeMounts:
+        - name: otel-collector-config
+          mountPath: /etc/otel-collector-config.yaml
+          subPath: config.yaml
+      volumes:
+      - name: otel-collector-config
+        configMap:
+          name: otel-collector-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: ms
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch:
+    exporters:
+      clickhousetraces:
+        datasource: tcp://otel:signoz@clickhouse:9000/signoz_traces
+      clickhouselogsexporter:
+        dsn: tcp://otel:signoz@clickhouse:9000/signoz_logs
+      clickhousemetricswrite:
+        endpoint: tcp://otel:signoz@clickhouse:9000/signoz_metrics
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [clickhousetraces]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [clickhousemetricswrite]
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [clickhouselogsexporter]

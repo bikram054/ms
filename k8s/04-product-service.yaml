@@ -25,6 +25,16 @@ spec:
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "prod"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://signoz-otel-collector:4317"
+        - name: OTEL_LOGS_EXPORTER
+          value: "otlp"
+        - name: OTEL_METRICS_EXPORTER
+          value: "otlp"
+        - name: OTEL_TRACES_EXPORTER
+          value: "otlp"
+        - name: OTEL_SERVICE_NAME
+          value: "product-service"
         livenessProbe:
           httpGet:
             path: /actuator/health
